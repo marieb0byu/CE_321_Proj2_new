@@ -83,6 +83,6 @@ Q81::8.50
 Q82::16.99
 Q83::N
 Q84::N
-Q85::Y
-Q86::
-Q87::
+Q85::N
+Q86::The six panel gable truss had the lowest maximum stress, followed by the eight panel gable, and then the scissor truss experienced the largest magnitude of stress. As for the applied forces at the nodes, the six panel gable truss experienced the largest applied forces per node, but smaller pin and roller reactions. Concerning material used, the six-panel truss had 21 bars, which is less than the eight panel trusses with 29 bars. It also uses 2 fewer purlins, both factors causing it to have the lowest associated cost. Aesthetically, the scissor truss has the smallest cross-sectional outline, making it ideal for someone who wants a higher room height in their building. 
+Q87::I would recommend the six panel gabled truss because it gives the least amount of stress on its members and uses the least amount of material.
