@@ -30,39 +30,37 @@ def KnownForcesInLocalFrame(node, local_x_bar):
             sum_y += bar.axial_load * geom.SineVectors(x_vec, bar_vec)
     return sum_x, sum_y
 
-# Force in local_x_bar from the sum of forces along its own axis.
-# If another bar is still unknown, pass it and its (just solved) force.
-def SumOfForcesInLocalX(node, local_x_bar, other_bar=None, other_force=0.0):
+# Compute and store the force in local_x_bar from the sum of forces
+# along its own axis, and mark it computed.
+def SumOfForcesInLocalX(node, local_x_bar):
     sum_x, _ = KnownForcesInLocalFrame(node, local_x_bar)
-    if other_bar is not None:
-        sum_x += other_force * geom.CosineBars(local_x_bar, other_bar)
-    return -sum_x
+    force = -sum_x
+    local_x_bar.SetAxialLoad(force)
+    local_x_bar.is_computed = True
+    return force
 
-# Force in the second unknown bar from the sum of forces perpendicular to
-# the first (the first bar has no component in local y)
+# Compute and store the force in the second unknown bar from the sum of
+# forces perpendicular to the first unknown bar (the local x bar), and
+# mark it computed.
 def SumOfForcesInLocalY(node, unknown_bars):
-    x_bar, other_bar = unknown_bars
+    x_bar, other_bar = unknown_bars[0], unknown_bars[1]
     _, sum_y = KnownForcesInLocalFrame(node, x_bar)
-    return -sum_y / geom.SineBars(x_bar, other_bar)
+    force = -sum_y / geom.SineBars(x_bar, other_bar)
+    other_bar.SetAxialLoad(force)
+    other_bar.is_computed = True
+    return force
 
 def IterateUsingMethodOfJoints(nodes, bars):
+    max_iterations = 10 * len(nodes) + 10
+    iteration = 0
     while any(not bar.is_computed for bar in bars):
-        progress = False
+        iteration += 1
+        if iteration > max_iterations:
+            sys.exit("Method of joints did not converge; check the truss and supports")
         for node in nodes:
             if not NodeIsViable(node):
                 continue
             unknown = UnknownBars(node)
-            x_bar = unknown[0]
             if len(unknown) == 2:
-                other_bar = unknown[1]
-                other_force = SumOfForcesInLocalY(node, unknown)
-                x_force = SumOfForcesInLocalX(node, x_bar, other_bar, other_force)
-                other_bar.SetAxialLoad(other_force)
-                other_bar.is_computed = True
-            else:
-                x_force = SumOfForcesInLocalX(node, x_bar)
-            x_bar.SetAxialLoad(x_force)
-            x_bar.is_computed = True
-            progress = True
-        if not progress:
-            sys.exit("No viable node found; method of joints cannot continue")
+                SumOfForcesInLocalY(node, unknown)
+            SumOfForcesInLocalX(node, unknown[0])
