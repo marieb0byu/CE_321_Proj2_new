@@ -56,9 +56,9 @@ def IterateUsingMethodOfJoints(nodes, bars):
             if len(unknown) == 2:
                 other_bar = unknown[1]
                 other_force = SumOfForcesInLocalY(node, unknown)
+                x_force = SumOfForcesInLocalX(node, x_bar, other_bar, other_force)
                 other_bar.SetAxialLoad(other_force)
                 other_bar.is_computed = True
-                x_force = SumOfForcesInLocalX(node, x_bar, other_bar, other_force)
             else:
                 x_force = SumOfForcesInLocalX(node, x_bar)
             x_bar.SetAxialLoad(x_force)
